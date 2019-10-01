@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import codecs
 import os
@@ -7,16 +9,16 @@ import logging
 from typing import Tuple
 from bs4 import BeautifulSoup
 
-
 L = logging.getLogger(__name__)
 
 
 def get_args():
     ap = argparse.ArgumentParser(usage='clean up html files')
-    ap.add_argument('files', nargs='+', help='files')
+    ap.add_argument('files', nargs='+', help='files or directories')
     ap.add_argument('--processor', type=int, default=1, help='number of process')
     ap.add_argument('--encoding', help='fallback to this encoding')
     ap.add_argument('--no-script', action='store_true', help='remove js')
+    ap.add_argument('--css', metavar='CSS_FILE', help='inject the content of CSS_FILE to html')
     ap.add_argument('-r', '--recursive', action='store_true', help='recursive into directory')
     ap.add_argument('-p', '--pattern', default=r'.+\.html?$', help='glob pattern')
     return ap.parse_args()
@@ -52,8 +54,7 @@ def consumer(args, filename):
         L.exception('do_file: %s', filename)
 
 
-PRESERVE_CHARS = \
-    '\u3000'    # full width space
+PRESERVE_CHARS = '\u3000'  # full width space
 PRESERVE_PLACEHOLDER = ''.join(chr(x) for x in range(0x10FFFD, 0x10FFFD - len(PRESERVE_CHARS), -1))
 PRESERVE_TRANS = str.maketrans(PRESERVE_CHARS, PRESERVE_PLACEHOLDER)
 PRESERVE_RECOVER = str.maketrans(PRESERVE_PLACEHOLDER, PRESERVE_CHARS)
@@ -81,6 +82,20 @@ def do_file(args, filename):
             head_tag = soup.new_tag('head')
             soup.find('html').insert(0, head_tag)
         head_tag.insert(0, soup.new_tag('meta', charset='utf-8'))
+
+    # css
+    if args.css:
+        # read css file
+        if not hasattr(args, 'css_content'):
+            with open(args.css, 'rt', encoding='utf-8') as fp:
+                args.css_content = fp.read()
+        # set style
+        tag_id = 'html-cleaner-css'
+        style_tag = soup.find('style', id=tag_id)
+        if not style_tag:
+            style_tag = soup.new_tag('style', id=tag_id)
+            soup.find('head').append(style_tag)
+        style_tag.string = args.css_content
 
     # clean up
     if args.no_script:
