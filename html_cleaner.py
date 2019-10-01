@@ -67,11 +67,20 @@ def do_file(args, filename):
     L.debug('file read as %s: %s', encoding, filename)
 
     # translate preserved chars
-    content = content.translate(PRESERVE_TRANS)
+    content_trans = content.translate(PRESERVE_TRANS)
 
     # parse html
     # 'lxml', 'html.parser'
-    soup = BeautifulSoup(content, 'html5lib')
+    soup = BeautifulSoup(content_trans, 'html5lib')
+
+    # add <meta charset=utf-8"/>
+    if not soup.select('meta[charset]'):
+        L.debug('insert meta charset tag')
+        head_tag = soup.find('head')
+        if not head_tag:
+            head_tag = soup.new_tag('head')
+            soup.find('html').insert(0, head_tag)
+        head_tag.insert(0, soup.new_tag('meta', charset='utf-8'))
 
     # clean up
     if args.no_script:

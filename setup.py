@@ -9,7 +9,7 @@ setup(
     url='https://github.com/account-login/html_cleaner',
     author='account-login',
     author_email='',
-    version='0.2dev',
+    version='0.3dev',
     py_modules=['html_cleaner'],
     install_requires=['beautifulsoup4', 'html5lib'],
     entry_points='''
