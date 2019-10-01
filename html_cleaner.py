@@ -12,12 +12,12 @@ L = logging.getLogger(__name__)
 
 
 def get_args():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(usage='clean up html files')
     ap.add_argument('files', nargs='+', help='files')
     ap.add_argument('--processor', type=int, default=1, help='number of process')
     ap.add_argument('--encoding', help='fallback to this encoding')
     ap.add_argument('--no-script', action='store_true', help='remove js')
-    ap.add_argument('-r', '--recursive', action='store_true', help='recusive into directory')
+    ap.add_argument('-r', '--recursive', action='store_true', help='recursive into directory')
     ap.add_argument('-p', '--pattern', default=r'.+\.html?$', help='glob pattern')
     return ap.parse_args()
 
