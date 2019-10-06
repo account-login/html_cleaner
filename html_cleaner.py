@@ -15,12 +15,12 @@ L = logging.getLogger(__name__)
 def get_args():
     ap = argparse.ArgumentParser(usage='clean up html files')
     ap.add_argument('files', nargs='+', help='files or directories')
-    ap.add_argument('--processor', type=int, default=1, help='number of process')
+    ap.add_argument('--processor', type=int, default=1, help='number of processes')
     ap.add_argument('--encoding', help='fallback to this encoding')
     ap.add_argument('--no-script', action='store_true', help='remove js')
     ap.add_argument('--css', metavar='CSS_FILE', help='inject the content of CSS_FILE to html')
-    ap.add_argument('-r', '--recursive', action='store_true', help='recursive into directory')
-    ap.add_argument('-p', '--pattern', default=r'.+\.html?$', help='glob pattern')
+    ap.add_argument('-r', '--recursive', action='store_true', help='recurse into directories')
+    ap.add_argument('-p', '--pattern', default=r'.+\.html?$', help='glob pattern for -r')
     return ap.parse_args()
 
 
@@ -124,7 +124,7 @@ def producer(args, pool: multiprocessing.Pool, filename):
         pool.apply_async(consumer, args=(args, filename))
         return
 
-    # recursive into dirs
+    # recurse into dirs
     if os.path.isdir(filename):
         if not args.recursive:
             raise Exception('file is directory: ' + filename)
